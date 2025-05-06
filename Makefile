@@ -1,0 +1,14 @@
+bot_build:
+	go build -o bin/expbot cmd/bot/*
+
+service_build:
+	go build -o bin/expservice cmd/service/*
+
+build: bot_build service_build
+
+initdb:
+	rm data/data.db
+	sqlite3 data/data.db "CREATE TABLE raw_messages (id INT8 PRIMARY KEY, user_id INT8 NOT NULL, msg_value TEXT, created TEXT);"
+	sqlite3 data/data.db "CREATE TABLE expenses (id INT8 PRIMARY KEY, exp_date TEXT, exp_value INT8, exp_description TEXT, created TEXT);"
+
+build_clean: build initdb
