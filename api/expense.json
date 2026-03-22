@@ -1,0 +1,34 @@
+{
+    "$schema":"https://json-schema.org/draft-04/schema#",
+    "description": "Схема записи о расходе",
+    "type":"object",
+    "properties": {
+        "date":{
+            "type":"string",
+            "format":"date",
+            "description":"дата расхода в формате год-месяц-день"
+        },
+        "amount":{
+            "type":"number",
+            "description": "сумма расхода"
+        },
+        "reason":{
+            "type":"string",
+            "description": "причина расхода - на что потратили"
+        },
+        "category":{
+            "type":"string",
+            "description": "категория расхода - будет использоваться позже"
+        },
+        "raw":{
+            "type":"string",
+            "description": "исходное сообщение о расходе от пользователя"
+        }
+    },
+    "required":[
+        "date",
+        "amount",
+        "reason",
+        "raw"
+    ]
+}

@@ -1,11 +1,14 @@
-package bot
+package main
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
+	"github.com/cvartan/goconfig"
 	botapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"h12.io/socks"
 )
 
 type BotRequest struct {
@@ -22,15 +25,17 @@ type TelegramBot struct {
 	token           string
 	commandHandlers map[string]BotHandleFunc
 	defaultHandler  BotHandleFunc
+	config          *goconfig.Configuration
 }
 
-func New(token string) *TelegramBot {
+func New(token string, config *goconfig.Configuration) *TelegramBot {
 	if token == "" {
 		panic("token must be defined")
 	}
 	return &TelegramBot{
 		token:           token,
 		commandHandlers: make(map[string]BotHandleFunc, 8),
+		config:          config,
 	}
 }
 
@@ -52,7 +57,16 @@ func (bot *TelegramBot) SetCommandHandler(command string, handler BotHandleFunc)
 }
 
 func (bot *TelegramBot) Listen(ctx context.Context) error {
-	b, err := botapi.NewBotAPI(bot.token)
+	httpClient := &http.Client{}
+
+	proxyUrl := bot.config.Get("proxy.socks5").String()
+	if proxyUrl != "" {
+		dialer := socks.Dial(proxyUrl)
+		transport := &http.Transport{Dial: dialer}
+		httpClient.Transport = transport
+	}
+
+	b, err := botapi.NewBotAPIWithClient(bot.token, botapi.APIEndpoint, httpClient)
 	if err != nil {
 		return fmt.Errorf("creating bot error: %v", err)
 	}

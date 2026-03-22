@@ -1,5 +1,5 @@
 telegram:
-  token: 
+  token: token_guid
 
 db:
   path: ../data/data.db

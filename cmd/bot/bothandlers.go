@@ -1,7 +1,6 @@
-package bothandlers
+package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -9,7 +8,6 @@ import (
 	"time"
 
 	"github.com/cvartan/goconfig"
-	"github.com/cvartan/goexpenseslog/internal/bot"
 	"github.com/cvartan/goexpenseslog/internal/model"
 )
 
@@ -28,10 +26,10 @@ const startText string = `
 type TelegramBotService struct {
 	rawMessagesRepo model.RawMessageRepositoryHandler
 	expensesRepo    model.ExpensesRepositoryHandler
-	configuration   *goconfig.ConfigurationManager
+	configuration   *goconfig.Configuration
 }
 
-func NewBot(rawMessageRepo model.RawMessageRepositoryHandler, expensesRepo model.ExpensesRepositoryHandler, configuration *goconfig.ConfigurationManager) *TelegramBotService {
+func NewBot(rawMessageRepo model.RawMessageRepositoryHandler, expensesRepo model.ExpensesRepositoryHandler, configuration *goconfig.Configuration) *TelegramBotService {
 	return &TelegramBotService{
 		rawMessagesRepo: rawMessageRepo,
 		expensesRepo:    expensesRepo,
@@ -39,13 +37,13 @@ func NewBot(rawMessageRepo model.RawMessageRepositoryHandler, expensesRepo model
 	}
 }
 
-func (b *TelegramBotService) HandleStart(req *bot.BotRequest, resp *bot.BotResponse) error {
+func (b *TelegramBotService) HandleStart(req *BotRequest, resp *BotResponse) error {
 	resp.Text = startText
 
 	return nil
 }
 
-func (b *TelegramBotService) HandleDefault(req *bot.BotRequest, resp *bot.BotResponse) error {
+func (b *TelegramBotService) HandleDefault(req *BotRequest, resp *BotResponse) error {
 	if req.Message.IsCommand() {
 		resp.Text = "Неизвестная команда. Используйте меню."
 		return fmt.Errorf("unrecognized command: %s", req.Message.Command())
@@ -113,13 +111,9 @@ func (b *TelegramBotService) HandleDefault(req *bot.BotRequest, resp *bot.BotRes
 	return nil
 }
 
-func (b *TelegramBotService) HandleList(req *bot.BotRequest, resp *bot.BotResponse) error {
-	controlUserId, ok := b.configuration.Get("control.userId").(int)
-	if !ok {
-		resp.Text = "У Вас нет прав на эту операцию!"
-		return errors.New("configuration parameter control.userId is not present in configuration file")
-	}
-	if req.Message.From.ID != int64(controlUserId) {
+func (b *TelegramBotService) HandleList(req *BotRequest, resp *BotResponse) error {
+	controlUserId := b.configuration.Get("control.userId").Int()
+	if req.Message.From.ID != controlUserId {
 		resp.Text = "У Вас нет прав на эту операцию!"
 		return fmt.Errorf("unauthorized access for list command for user %d", req.Message.From.ID)
 	}
@@ -149,7 +143,7 @@ func (b *TelegramBotService) HandleList(req *bot.BotRequest, resp *bot.BotRespon
 	return nil
 }
 
-func (b *TelegramBotService) HandleUserData(req *bot.BotRequest, resp *bot.BotResponse) error {
+func (b *TelegramBotService) HandleUserData(req *BotRequest, resp *BotResponse) error {
 	userId := req.Message.From.ID
 
 	msgs, err := b.rawMessagesRepo.GetUserData(userId)
@@ -174,7 +168,7 @@ func (b *TelegramBotService) HandleUserData(req *bot.BotRequest, resp *bot.BotRe
 	return nil
 }
 
-func (b *TelegramBotService) HandleMonthSummary(req *bot.BotRequest, resp *bot.BotResponse) error {
+func (b *TelegramBotService) HandleMonthSummary(req *BotRequest, resp *BotResponse) error {
 	sum, err := b.expensesRepo.GetMonthSummary()
 	if err != nil {
 		resp.Text = "Ошибка. Повторите запрос позже"
@@ -185,7 +179,7 @@ func (b *TelegramBotService) HandleMonthSummary(req *bot.BotRequest, resp *bot.B
 	return nil
 }
 
-func (b *TelegramBotService) HandlePrevMonthSummary(req *bot.BotRequest, resp *bot.BotResponse) error {
+func (b *TelegramBotService) HandlePrevMonthSummary(req *BotRequest, resp *BotResponse) error {
 	sum, err := b.expensesRepo.GetPrevMonthSummary()
 	if err != nil {
 		resp.Text = "Ошибка. Повторите запрос позже"

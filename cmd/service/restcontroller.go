@@ -1,4 +1,4 @@
-package restcontroller
+package main
 
 import (
 	"encoding/json"
