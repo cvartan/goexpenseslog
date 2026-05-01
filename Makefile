@@ -1,10 +1,7 @@
 bot:
 	go build -o bin/expbot cmd/bot/*
 
-service:
-	go build -o bin/expservice cmd/service/*
-
-all: bot service
+all: bot
 
 
 initdb:

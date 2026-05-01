@@ -1,12 +1,13 @@
-package main
+package bot
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+	"time"
 
-	"github.com/cvartan/goconfig"
 	botapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"h12.io/socks"
 )
@@ -25,17 +26,16 @@ type TelegramBot struct {
 	token           string
 	commandHandlers map[string]BotHandleFunc
 	defaultHandler  BotHandleFunc
-	config          *goconfig.Configuration
+	ProxyUrl        string `config:"proxy.socks5"`
 }
 
-func New(token string, config *goconfig.Configuration) *TelegramBot {
+func New(token string) *TelegramBot {
 	if token == "" {
 		panic("token must be defined")
 	}
 	return &TelegramBot{
 		token:           token,
 		commandHandlers: make(map[string]BotHandleFunc, 8),
-		config:          config,
 	}
 }
 
@@ -59,16 +59,30 @@ func (bot *TelegramBot) SetCommandHandler(command string, handler BotHandleFunc)
 func (bot *TelegramBot) Listen(ctx context.Context) error {
 	httpClient := &http.Client{}
 
-	proxyUrl := bot.config.Get("proxy.socks5").String()
-	if proxyUrl != "" {
-		dialer := socks.Dial(proxyUrl)
+	if bot.ProxyUrl != "" {
+		dialer := socks.Dial(bot.ProxyUrl)
 		transport := &http.Transport{Dial: dialer}
 		httpClient.Transport = transport
 	}
 
-	b, err := botapi.NewBotAPIWithClient(bot.token, botapi.APIEndpoint, httpClient)
-	if err != nil {
-		return fmt.Errorf("creating bot error: %v", err)
+	var (
+		b   *botapi.BotAPI
+		err error
+		i   int = 0
+	)
+
+	for {
+		b, err = botapi.NewBotAPIWithClient(bot.token, botapi.APIEndpoint, httpClient)
+		if err != nil {
+			log.Println("creating bot error: sleep for next attempt")
+			time.Sleep(time.Second * time.Duration(math.Pow10(i)))
+		} else {
+			break
+		}
+
+		if i++; i == 2 {
+			return fmt.Errorf("creating bot error: %v", err)
+		}
 	}
 
 	updater := botapi.NewUpdate(0)

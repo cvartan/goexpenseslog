@@ -6,7 +6,9 @@ import (
 	"log"
 
 	"github.com/cvartan/goconfig"
+	"github.com/cvartan/goexpenseslog/internal/handlers/bothandlers"
 	"github.com/cvartan/goexpenseslog/internal/repos"
+	"github.com/cvartan/goexpenseslog/pkg/bot"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -14,7 +16,7 @@ func main() {
 	var err error
 
 	var Configuration *goconfig.Configuration
-	var Bot *TelegramBot
+	var Bot *bot.TelegramBot
 
 	var RawMessagesRepository *repos.RawMessageRepository
 	var ExpensesRepository *repos.ExpensesRepository
@@ -28,13 +30,6 @@ func main() {
 		},
 	)
 
-	Configuration.Set("telegram.token", "")
-	Configuration.Set("control.userId", 0)
-	Configuration.Set("db.path", "../data/data.db")
-	Configuration.Set("proxy.socks5", "")
-
-	Configuration.Apply()
-
 	var db *sql.DB
 	if db, err = sql.Open("sqlite3", Configuration.Get("db.path").String()); err != nil {
 		log.Fatalf("open database error: %v", err)
@@ -44,9 +39,11 @@ func main() {
 	RawMessagesRepository = repos.NewRawMessgeRepository(db)
 	ExpensesRepository = repos.NewExpensesRepository(db)
 
-	botService := NewBot(RawMessagesRepository, ExpensesRepository, Configuration)
+	botService := bothandlers.NewBot(RawMessagesRepository, ExpensesRepository, Configuration)
 
-	Bot = New(Configuration.Get("telegram.token").String(), Configuration)
+	Bot = bot.New(Configuration.Get("telegram.token").String())
+
+	Configuration.Bind(Bot)
 
 	Bot.SetCommandHandler("start", botService.HandleStart)
 	Bot.SetCommandHandler("help", botService.HandleStart)

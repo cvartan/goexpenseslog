@@ -1,4 +1,4 @@
-package main
+package bothandlers
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/cvartan/goconfig"
 	"github.com/cvartan/goexpenseslog/internal/model"
+	"github.com/cvartan/goexpenseslog/pkg/bot"
 )
 
 const startText string = `
@@ -37,13 +38,13 @@ func NewBot(rawMessageRepo model.RawMessageRepositoryHandler, expensesRepo model
 	}
 }
 
-func (b *TelegramBotService) HandleStart(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandleStart(req *bot.BotRequest, resp *bot.BotResponse) error {
 	resp.Text = startText
 
 	return nil
 }
 
-func (b *TelegramBotService) HandleDefault(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandleDefault(req *bot.BotRequest, resp *bot.BotResponse) error {
 	if req.Message.IsCommand() {
 		resp.Text = "Неизвестная команда. Используйте меню."
 		return fmt.Errorf("unrecognized command: %s", req.Message.Command())
@@ -111,7 +112,7 @@ func (b *TelegramBotService) HandleDefault(req *BotRequest, resp *BotResponse) e
 	return nil
 }
 
-func (b *TelegramBotService) HandleList(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandleList(req *bot.BotRequest, resp *bot.BotResponse) error {
 	controlUserId := b.configuration.Get("control.userId").Int()
 	if req.Message.From.ID != controlUserId {
 		resp.Text = "У Вас нет прав на эту операцию!"
@@ -143,7 +144,7 @@ func (b *TelegramBotService) HandleList(req *BotRequest, resp *BotResponse) erro
 	return nil
 }
 
-func (b *TelegramBotService) HandleUserData(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandleUserData(req *bot.BotRequest, resp *bot.BotResponse) error {
 	userId := req.Message.From.ID
 
 	msgs, err := b.rawMessagesRepo.GetUserData(userId)
@@ -168,7 +169,7 @@ func (b *TelegramBotService) HandleUserData(req *BotRequest, resp *BotResponse) 
 	return nil
 }
 
-func (b *TelegramBotService) HandleMonthSummary(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandleMonthSummary(req *bot.BotRequest, resp *bot.BotResponse) error {
 	sum, err := b.expensesRepo.GetMonthSummary()
 	if err != nil {
 		resp.Text = "Ошибка. Повторите запрос позже"
@@ -179,7 +180,7 @@ func (b *TelegramBotService) HandleMonthSummary(req *BotRequest, resp *BotRespon
 	return nil
 }
 
-func (b *TelegramBotService) HandlePrevMonthSummary(req *BotRequest, resp *BotResponse) error {
+func (b *TelegramBotService) HandlePrevMonthSummary(req *bot.BotRequest, resp *bot.BotResponse) error {
 	sum, err := b.expensesRepo.GetPrevMonthSummary()
 	if err != nil {
 		resp.Text = "Ошибка. Повторите запрос позже"

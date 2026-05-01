@@ -30,6 +30,8 @@ data/*
 
 bin/*
 
-service/*
+deploy/*
+
+
 
 prompts/*

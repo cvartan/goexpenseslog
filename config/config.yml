@@ -1,12 +1,8 @@
 telegram:
-  token: token_guid
+  token: 
 
 db:
   path: ../data/data.db
-
-api:
-  server: 127.0.0.1
-  port: 8084
 
 control:
   userId: 0
