@@ -1,4 +1,4 @@
-package repos
+package sqliteimpl
 
 import (
 	"database/sql"
@@ -8,18 +8,18 @@ import (
 	"github.com/cvartan/goexpenseslog/internal/model"
 )
 
-type ExpensesRepository struct {
+type SqlLiteExpensesRepository struct {
 	insertQ             *sql.Stmt
 	deleteQ             *sql.Stmt
-	deleteBeforeIdQ     *sql.Stmt
+	deleteAllBeforeIdQ  *sql.Stmt
 	getAllQ             *sql.Stmt
 	getSummaryByPeriodQ *sql.Stmt
 }
 
-func NewExpensesRepository(db *sql.DB) *ExpensesRepository {
+func NewExpensesRepository(db *sql.DB) *SqlLiteExpensesRepository {
 	var err error
 
-	repo := &ExpensesRepository{}
+	repo := &SqlLiteExpensesRepository{}
 
 	if repo.insertQ, err = db.Prepare("INSERT INTO expenses (id, exp_date, exp_value, exp_description, created) VALUES (?,?,?,?,?)"); err != nil {
 		panic(fmt.Sprintf("error creating statement with error: %v", err))
@@ -29,7 +29,7 @@ func NewExpensesRepository(db *sql.DB) *ExpensesRepository {
 		panic(fmt.Sprintf("error creating statement with error: %v", err))
 	}
 
-	if repo.deleteBeforeIdQ, err = db.Prepare("DELETE FROM expenses WHERE id<?"); err != nil {
+	if repo.deleteAllBeforeIdQ, err = db.Prepare("DELETE FROM expenses WHERE id<?"); err != nil {
 		panic(fmt.Sprintf("error creating statement with error: %v", err))
 	}
 
@@ -44,7 +44,7 @@ func NewExpensesRepository(db *sql.DB) *ExpensesRepository {
 	return repo
 }
 
-func (r *ExpensesRepository) Add(expense *model.ExpenseInfo) error {
+func (r *SqlLiteExpensesRepository) Add(expense *model.ExpenseInfo) error {
 	created := time.Now()
 
 	_, err := r.insertQ.Exec(expense.Id, expense.Date.Format(time.DateOnly), expense.Value, expense.Description, created.Format(time.StampMilli))
@@ -55,7 +55,7 @@ func (r *ExpensesRepository) Add(expense *model.ExpenseInfo) error {
 	return nil
 }
 
-func (r *ExpensesRepository) Delete(id int64) error {
+func (r *SqlLiteExpensesRepository) Delete(id int64) error {
 	_, err := r.deleteQ.Exec(id)
 	if err != nil {
 		return fmt.Errorf("delete expense error: %v", err)
@@ -63,8 +63,8 @@ func (r *ExpensesRepository) Delete(id int64) error {
 	return nil
 }
 
-func (r *ExpensesRepository) DeleteBeforeId(id int64) error {
-	_, err := r.deleteBeforeIdQ.Exec(id)
+func (r *SqlLiteExpensesRepository) DeleteAllBeforeId(id int64) error {
+	_, err := r.deleteAllBeforeIdQ.Exec(id)
 	if err != nil {
 		return fmt.Errorf("delete expenses error: %v", err)
 	}
@@ -72,7 +72,7 @@ func (r *ExpensesRepository) DeleteBeforeId(id int64) error {
 	return nil
 }
 
-func (r *ExpensesRepository) GetAll() (*[]model.ExpenseInfo, error) {
+func (r *SqlLiteExpensesRepository) GetAll() (*[]model.ExpenseInfo, error) {
 	res, err := r.getAllQ.Query()
 	if err != nil {
 		return nil, fmt.Errorf("get expenses query error: %v", err)
@@ -117,7 +117,7 @@ func (r *ExpensesRepository) GetAll() (*[]model.ExpenseInfo, error) {
 	return &result, nil
 }
 
-func (r *ExpensesRepository) GetMonthSummary() (int32, error) {
+func (r *SqlLiteExpensesRepository) GetMonthSummary() (int32, error) {
 	year, month, _ := time.Now().Date()
 
 	startMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())
@@ -139,7 +139,7 @@ func (r *ExpensesRepository) GetMonthSummary() (int32, error) {
 
 	return sum, nil
 }
-func (r *ExpensesRepository) GetPrevMonthSummary() (int32, error) {
+func (r *SqlLiteExpensesRepository) GetPrevMonthSummary() (int32, error) {
 	year, month, _ := time.Now().AddDate(0, -1, 0).Date()
 
 	startMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.Now().Location())

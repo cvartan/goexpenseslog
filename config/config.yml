@@ -5,4 +5,4 @@ db:
   path: ../data/data.db
 
 control:
-  userId: 0
+  userId: 

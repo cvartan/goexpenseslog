@@ -9,6 +9,7 @@ import (
 
 	"github.com/cvartan/goconfig"
 	"github.com/cvartan/goexpenseslog/internal/model"
+	"github.com/cvartan/goexpenseslog/internal/repos"
 	"github.com/cvartan/goexpenseslog/pkg/bot"
 )
 
@@ -25,12 +26,12 @@ const startText string = `
 `
 
 type TelegramBotService struct {
-	rawMessagesRepo model.RawMessageRepositoryHandler
-	expensesRepo    model.ExpensesRepositoryHandler
+	rawMessagesRepo repos.RawMessageRepository
+	expensesRepo    repos.ExpensesRepository
 	configuration   *goconfig.Configuration
 }
 
-func NewBot(rawMessageRepo model.RawMessageRepositoryHandler, expensesRepo model.ExpensesRepositoryHandler, configuration *goconfig.Configuration) *TelegramBotService {
+func NewBot(rawMessageRepo repos.RawMessageRepository, expensesRepo repos.ExpensesRepository, configuration *goconfig.Configuration) *TelegramBotService {
 	return &TelegramBotService{
 		rawMessagesRepo: rawMessageRepo,
 		expensesRepo:    expensesRepo,

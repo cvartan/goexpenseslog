@@ -8,6 +8,7 @@ import (
 	"github.com/cvartan/goconfig"
 	"github.com/cvartan/goexpenseslog/internal/handlers/bothandlers"
 	"github.com/cvartan/goexpenseslog/internal/repos"
+	"github.com/cvartan/goexpenseslog/internal/repos/sqliteimpl"
 	"github.com/cvartan/goexpenseslog/pkg/bot"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -18,8 +19,8 @@ func main() {
 	var Configuration *goconfig.Configuration
 	var Bot *bot.TelegramBot
 
-	var RawMessagesRepository *repos.RawMessageRepository
-	var ExpensesRepository *repos.ExpensesRepository
+	var RawMessagesRepository repos.RawMessageRepository
+	var ExpensesRepository repos.ExpensesRepository
 
 	log.Println("Starting bot service")
 
@@ -36,8 +37,8 @@ func main() {
 	}
 	defer db.Close()
 
-	RawMessagesRepository = repos.NewRawMessgeRepository(db)
-	ExpensesRepository = repos.NewExpensesRepository(db)
+	RawMessagesRepository = sqliteimpl.NewRawMessgeRepository(db)
+	ExpensesRepository = sqliteimpl.NewExpensesRepository(db)
 
 	botService := bothandlers.NewBot(RawMessagesRepository, ExpensesRepository, Configuration)
 

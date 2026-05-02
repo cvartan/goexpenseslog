@@ -1,4 +1,4 @@
-package repos
+package sqliteimpl
 
 import (
 	"database/sql"
@@ -9,22 +9,22 @@ import (
 	"github.com/cvartan/goexpenseslog/internal/model"
 )
 
-type RawMessageRepository struct {
-	node            *snowflake.Node
-	insertQ         *sql.Stmt
-	deleteQ         *sql.Stmt
-	deleteBeforeIdQ *sql.Stmt
-	getAllQ         *sql.Stmt
-	getUserDataQ    *sql.Stmt
+type SqlLiteRawMessageRepository struct {
+	node               *snowflake.Node
+	insertQ            *sql.Stmt
+	deleteQ            *sql.Stmt
+	deleteAllBeforeIdQ *sql.Stmt
+	getAllQ            *sql.Stmt
+	getUserDataQ       *sql.Stmt
 }
 
-func NewRawMessgeRepository(db *sql.DB) *RawMessageRepository {
+func NewRawMessgeRepository(db *sql.DB) *SqlLiteRawMessageRepository {
 	n, err := snowflake.NewNode(1)
 	if err != nil {
 		panic(fmt.Sprintf("can't create node for generating snowflake id error: %v", err))
 	}
 
-	repo := &RawMessageRepository{
+	repo := &SqlLiteRawMessageRepository{
 		node: n,
 	}
 
@@ -36,7 +36,7 @@ func NewRawMessgeRepository(db *sql.DB) *RawMessageRepository {
 		panic(fmt.Sprintf("error creating statement error: %v", err))
 	}
 
-	if repo.deleteBeforeIdQ, err = db.Prepare("DELETE FROM raw_messages WHERE id<?"); err != nil {
+	if repo.deleteAllBeforeIdQ, err = db.Prepare("DELETE FROM raw_messages WHERE id<?"); err != nil {
 		panic(fmt.Sprintf("error creating statement error: %v", err))
 	}
 
@@ -51,7 +51,7 @@ func NewRawMessgeRepository(db *sql.DB) *RawMessageRepository {
 	return repo
 }
 
-func (r *RawMessageRepository) Add(message *model.RawMessage) error {
+func (r *SqlLiteRawMessageRepository) Add(message *model.RawMessage) error {
 	id := r.node.Generate()
 	created := time.Now()
 
@@ -66,7 +66,7 @@ func (r *RawMessageRepository) Add(message *model.RawMessage) error {
 	return nil
 }
 
-func (r *RawMessageRepository) Delete(id int64) error {
+func (r *SqlLiteRawMessageRepository) Delete(id int64) error {
 	_, err := r.deleteQ.Exec(id)
 	if err != nil {
 		return fmt.Errorf("delete raw message error: %v", err)
@@ -75,8 +75,8 @@ func (r *RawMessageRepository) Delete(id int64) error {
 	return nil
 }
 
-func (r *RawMessageRepository) DeleteBeforeId(id int64) error {
-	_, err := r.deleteBeforeIdQ.Exec(id)
+func (r *SqlLiteRawMessageRepository) DeleteAllBeforeId(id int64) error {
+	_, err := r.deleteAllBeforeIdQ.Exec(id)
 	if err != nil {
 		return fmt.Errorf("delete raw message error: %v", err)
 	}
@@ -84,7 +84,7 @@ func (r *RawMessageRepository) DeleteBeforeId(id int64) error {
 	return nil
 }
 
-func (r *RawMessageRepository) GetAll() (*[]model.RawMessage, error) {
+func (r *SqlLiteRawMessageRepository) GetAll() (*[]model.RawMessage, error) {
 	res, err := r.getAllQ.Query()
 	if err != nil {
 		return nil, fmt.Errorf("query raw messages cancel with error: %v", err)
@@ -123,7 +123,7 @@ func (r *RawMessageRepository) GetAll() (*[]model.RawMessage, error) {
 	return &result, nil
 }
 
-func (r *RawMessageRepository) GetUserData(user_id int64) (*[]model.RawMessage, error) {
+func (r *SqlLiteRawMessageRepository) GetUserData(user_id int64) (*[]model.RawMessage, error) {
 	res, err := r.getUserDataQ.Query(user_id)
 	if err != nil {
 		return nil, fmt.Errorf("query raw messages cancel with error: %v", err)

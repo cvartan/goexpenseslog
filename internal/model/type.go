@@ -10,11 +10,9 @@ type ExpenseInfo struct {
 	Created     time.Time `json:"created"`
 }
 
-type ExpensesRepositoryHandler interface {
-	Add(*ExpenseInfo) error
-	Delete(int64) error
-	DeleteBeforeId(int64) error
-	GetAll() (*[]ExpenseInfo, error)
-	GetMonthSummary() (int32, error)
-	GetPrevMonthSummary() (int32, error)
+type RawMessage struct {
+	Id      int64     `json:"id"`
+	UserId  int64     `json:"user_id"`
+	Value   string    `json:"value"`
+	Created time.Time `json:"created"`
 }
