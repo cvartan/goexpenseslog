@@ -2,12 +2,12 @@ package bothandlers
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cvartan/goconfig"
+	"github.com/cvartan/goexpenseslog/internal/logger"
 	"github.com/cvartan/goexpenseslog/internal/model"
 	"github.com/cvartan/goexpenseslog/internal/repos"
 	"github.com/cvartan/goexpenseslog/pkg/bot"
@@ -31,11 +31,10 @@ type TelegramBotService struct {
 	configuration   *goconfig.Configuration
 }
 
-func NewBot(rawMessageRepo repos.RawMessageRepository, expensesRepo repos.ExpensesRepository, configuration *goconfig.Configuration) *TelegramBotService {
+func NewBot(rawMessageRepo repos.RawMessageRepository, expensesRepo repos.ExpensesRepository) *TelegramBotService {
 	return &TelegramBotService{
 		rawMessagesRepo: rawMessageRepo,
 		expensesRepo:    expensesRepo,
-		configuration:   configuration,
 	}
 }
 
@@ -50,8 +49,9 @@ func (b *TelegramBotService) HandleDefault(req *bot.BotRequest, resp *bot.BotRes
 		resp.Text = "Неизвестная команда. Используйте меню."
 		return fmt.Errorf("unrecognized command: %s", req.Message.Command())
 	}
+	logger := logger.GetLogger(req.Ctx)
 
-	log.Printf("Сообщение от %d со значением: %s", req.Message.From.ID, req.Message.Text)
+	logger.Info("Message received", "sender", req.Message.From.ID, "message", req.Message.Text)
 
 	rm := &model.RawMessage{
 		UserId: req.Message.From.ID,

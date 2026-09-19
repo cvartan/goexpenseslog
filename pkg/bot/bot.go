@@ -14,6 +14,7 @@ import (
 
 type BotRequest struct {
 	botapi.Update
+	Ctx context.Context
 }
 
 type BotResponse struct {
@@ -106,7 +107,13 @@ func (bot *TelegramBot) Listen(ctx context.Context) error {
 				}
 				if handler != nil {
 					go func() {
-						req := &BotRequest{msg}
+						rctx, cancel := context.WithCancel(ctx)
+						defer cancel()
+						req := &BotRequest{
+							Update: msg,
+							Ctx:    rctx,
+						}
+
 						resp := &BotResponse{botapi.NewMessage(msg.Message.Chat.ID, "")}
 						if err := handler(req, resp); err != nil {
 							log.Println(err)

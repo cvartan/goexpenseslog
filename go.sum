@@ -1,7 +1,7 @@
 github.com/bwmarrin/snowflake v0.3.0 h1:xm67bEhkKh6ij1790JB83OujPR5CzNe8QuQqAgISZN0=
 github.com/bwmarrin/snowflake v0.3.0/go.mod h1:NdZxfVWX+oR6y2K0o6qAYv6gIOP9rjG0/E9WsDpxqwE=
-github.com/cvartan/goconfig v0.0.0-20260502144056-38abc7378f6e h1:wbU1o5utNzOIEa6pSkcy31BpacyRm7h/2/XAwSFsjM8=
-github.com/cvartan/goconfig v0.0.0-20260502144056-38abc7378f6e/go.mod h1:3AYT2pVxfLeu4FDzKLy53PbqX23e/5Zm0yVSivbof3A=
+github.com/cvartan/goconfig v1.2.1 h1:x4EdJoNr/J9Novh9RonG3cQNah/8+lIdtzbwr0XLB2Q=
+github.com/cvartan/goconfig v1.2.1/go.mod h1:QihST7K85AOKnyvW4ETtwjd2WghqwF3ffCX7fWDMZU4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
