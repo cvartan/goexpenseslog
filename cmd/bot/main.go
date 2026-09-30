@@ -33,6 +33,8 @@ func main() {
 
 	appcontext = context.WithValue(appcontext, "config", Configuration)
 
+	Configuration.Apply(appcontext)
+
 	var Logger *slog.Logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 	appcontext = context.WithValue(appcontext, "logger", Logger)
 

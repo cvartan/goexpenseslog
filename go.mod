@@ -4,13 +4,13 @@ go 1.25.0
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/cvartan/goconfig v1.2.1
+	github.com/cvartan/goconfig v1.3.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
-	github.com/mattn/go-sqlite3 v1.14.28
+	github.com/mattn/go-sqlite3 v1.14.52
 	h12.io/socks v1.0.3
 )
 
 require (
-	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
