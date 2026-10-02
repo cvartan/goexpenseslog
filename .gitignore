@@ -35,3 +35,6 @@ deploy/*
 
 
 prompts/*
+
+
+docker-compose.yml

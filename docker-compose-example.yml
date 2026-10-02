@@ -1,0 +1,12 @@
+name: goexpenseslog
+
+services:
+  goexpenseslog:
+    image: goexpenseslog:latest
+    volumes:
+      - {local_config_dir}: /opt/goexpenseslog/config
+      - {local_data_dir}: /opt/goexpenseslog/data
+    environment:
+      PROXY_SOCKS5: {url to socks proxy with port, comment if proxy is not used}
+      TELEGRAM_TOKEN: {telegram bot id} 
+      CONTROL_USERID: {control user id}

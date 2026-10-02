@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"database/sql"
+	"flag"
+	"log"
 	"log/slog"
 	"os"
 
@@ -15,13 +17,22 @@ import (
 )
 
 func main() {
+
+	var configSource string
+
+	flag.StringVar(&configSource, "config", "../config", "set path to config file")
+
+	flag.Parse()
+
+	log.Println(os.Args)
+
 	var appcontext context.Context = context.Background()
 
 	var err error
 
 	var Configuration *goconfig.Configuration = goconfig.NewConfiguration(
 		&goconfig.Options{
-			Source: "../config/config.yml",
+			Source: configSource,
 			Format: "yaml",
 		},
 	)
@@ -34,6 +45,8 @@ func main() {
 	appcontext = context.WithValue(appcontext, "config", Configuration)
 
 	Configuration.Apply(appcontext)
+
+	log.Println(Configuration.Get("db.path").String())
 
 	var Logger *slog.Logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 	appcontext = context.WithValue(appcontext, "logger", Logger)

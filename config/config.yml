@@ -2,7 +2,7 @@ telegram:
   token: 
 
 db:
-  path: ../data/data.db
+  path: data/data.db
 
 control:
   userId: 
